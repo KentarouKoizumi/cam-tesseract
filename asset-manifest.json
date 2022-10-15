@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/cam-tesseract/static/css/main.073c9b0a.css",
-    "main.js": "/cam-tesseract/static/js/main.89ee2336.js",
+    "main.js": "/cam-tesseract/static/js/main.92d8c390.js",
     "static/js/787.0d726691.chunk.js": "/cam-tesseract/static/js/787.0d726691.chunk.js",
     "index.html": "/cam-tesseract/index.html",
     "main.073c9b0a.css.map": "/cam-tesseract/static/css/main.073c9b0a.css.map",
-    "main.89ee2336.js.map": "/cam-tesseract/static/js/main.89ee2336.js.map",
+    "main.92d8c390.js.map": "/cam-tesseract/static/js/main.92d8c390.js.map",
     "787.0d726691.chunk.js.map": "/cam-tesseract/static/js/787.0d726691.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.073c9b0a.css",
-    "static/js/main.89ee2336.js"
+    "static/js/main.92d8c390.js"
   ]
 }
