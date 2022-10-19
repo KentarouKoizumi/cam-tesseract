@@ -407,8 +407,8 @@ function App() {
                 <TableCell>貸出日</TableCell>
                 {/* <TableCell>学籍番号</TableCell> */}
                 {/* <TableCell>ISBN</TableCell> */}
-                <TableCell>著者</TableCell>
                 <TableCell>タイトル</TableCell>
+                <TableCell>著者</TableCell>
                 <TableCell>貸出状況</TableCell>
               </TableRow>
             </TableHead>
@@ -428,8 +428,8 @@ function App() {
                     <TableCell >{row.lendingDatetime}</TableCell>
                     {/* <TableCell >{row.studentId}</TableCell> */}
                     {/* <TableCell component="th" scope="row">{row.bookIsbn}</TableCell> */}
-                    <TableCell >{row.bookAuthors.join(", ")}</TableCell>
                     <TableCell >{row.bookTitle}</TableCell>
+                    <TableCell >{row.bookAuthors.join(", ")}</TableCell>
                     {
                       row.isLendingNow ? (
                         <TableCell>貸出中</TableCell>
@@ -467,8 +467,8 @@ function App() {
                   <TableCell>貸出日</TableCell>
                   <TableCell>学籍番号</TableCell>
                   {/* <TableCell>ISBN</TableCell> */}
-                  <TableCell>著者</TableCell>
                   <TableCell>タイトル</TableCell>
+                  <TableCell>著者</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -480,8 +480,8 @@ function App() {
                     <TableCell >{row.lendingDatetime}</TableCell>
                     <TableCell >{row.studentId}</TableCell>
                     {/* <TableCell component="th" scope="row">{row.bookIsbn}</TableCell> */}
-                    <TableCell >{row.bookAuthors.join(", ")}</TableCell>
                     <TableCell >{row.bookTitle}</TableCell>
+                    <TableCell >{row.bookAuthors.join(", ")}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
