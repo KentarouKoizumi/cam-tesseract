@@ -21,8 +21,14 @@ import { Container } from '@mui/system';
 type RES = typeof r
 type typeLendingList = typeof _typeLendingList;
 
+
 const getDatabaseURL = "https://asia-northeast1-lounge-library.cloudfunctions.net/getDatabase";
 const postDatabaseURL = "https://asia-northeast1-lounge-library.cloudfunctions.net/postDatabase";
+const makeIsLendingNowFalseURL = "https://asia-northeast1-lounge-library.cloudfunctions.net/makeIsLendingNowFalse";
+
+// const getDatabaseURL = "http://127.0.0.1:5001/lounge-library/asia-northeast1/getDatabase";
+// const postDatabaseURL = "http://127.0.0.1:5001/lounge-library/asia-northeast1/postDatabase";
+// const makeIsLendingNowFalseURL = "http://127.0.0.1:5001/lounge-library/asia-northeast1/makeIsLendingNowFalse";
 
 
 function App() {
@@ -214,9 +220,21 @@ function App() {
     setTabValue(newValue);
   };
 
-  const returnBook = (id: string) => {
-    console.log(id)
+  const returnBook = async (returnInfo: typeLendingList) => {
+    console.log(returnInfo)
+    setIsPostingNow(true)
+    const request = await axios.post<typeLendingList>(makeIsLendingNowFalseURL, {returnInfo})
+      .then((response: AxiosResponse) => {
+      console.log(response)
+      setIsPostingNow(false);
+      setErrorSendRequestToPostDatabase("")
+    }).catch((error: AxiosError) => {
+      console.log(error)
+      setErrorSendRequestToPostDatabase(error.request.response)
+      setIsPostingNow(false);
+    })
   }
+
   return (
     <>
     <Container>
@@ -374,15 +392,24 @@ function App() {
           onChange={studentIdOnChangeHandler}
           error={studentId.length !== 0 && !isStudentIdValid}
         ></TextField>
+        {
+          isPostingNow ? (
+            <LinearProgress />
+          ) : (
+            <></>
+          )
+        }
         <TableContainer>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
+                <TableCell>返却</TableCell>
                 <TableCell>貸出日</TableCell>
-                <TableCell>学籍番号</TableCell>
-                <TableCell>ISBN</TableCell>
+                {/* <TableCell>学籍番号</TableCell> */}
+                {/* <TableCell>ISBN</TableCell> */}
                 <TableCell>著者</TableCell>
                 <TableCell>タイトル</TableCell>
+                <TableCell>貸出状況</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -393,16 +420,23 @@ function App() {
                   key={row.lendingDatetime}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
+                  <TableCell>
+                    <IconButton onClick={ ()=>returnBook(row) }>
+                      <DeleteIcon sx={{ color: red.A700 }}/>
+                    </IconButton>
+                  </TableCell>
                     <TableCell >{row.lendingDatetime}</TableCell>
-                    <TableCell >{row.studentId}</TableCell>
-                    <TableCell component="th" scope="row">{row.bookIsbn}</TableCell>
+                    {/* <TableCell >{row.studentId}</TableCell> */}
+                    {/* <TableCell component="th" scope="row">{row.bookIsbn}</TableCell> */}
                     <TableCell >{row.bookAuthors.join(", ")}</TableCell>
                     <TableCell >{row.bookTitle}</TableCell>
-                    <TableCell>
-                      <IconButton onClick={ ()=>returnBook(row.bookIsbn) }>
-                        <DeleteIcon sx={{ color: red.A700 }}/>
-                      </IconButton>
-                    </TableCell>
+                    {
+                      row.isLendingNow ? (
+                        <TableCell>貸出中</TableCell>
+                      ) : (
+                        <TableCell>返却済み</TableCell>
+                      )
+                    }
                   </TableRow>
                 }
                 </>
@@ -432,20 +466,20 @@ function App() {
                 <TableRow>
                   <TableCell>貸出日</TableCell>
                   <TableCell>学籍番号</TableCell>
-                  <TableCell>ISBN</TableCell>
+                  {/* <TableCell>ISBN</TableCell> */}
                   <TableCell>著者</TableCell>
                   <TableCell>タイトル</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {lendingList.map((row) => (
+                {lendingList.filter(row => row.isLendingNow === true).map((row) => (
                   <TableRow
                   key={row.lendingDatetime}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                     <TableCell >{row.lendingDatetime}</TableCell>
                     <TableCell >{row.studentId}</TableCell>
-                    <TableCell component="th" scope="row">{row.bookIsbn}</TableCell>
+                    {/* <TableCell component="th" scope="row">{row.bookIsbn}</TableCell> */}
                     <TableCell >{row.bookAuthors.join(", ")}</TableCell>
                     <TableCell >{row.bookTitle}</TableCell>
                   </TableRow>
