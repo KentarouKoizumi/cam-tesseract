@@ -1,6 +1,6 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { TextField } from '@mui/material';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox, Button } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { red } from '@mui/material/colors';
@@ -17,19 +17,37 @@ export default function RetrunForm () {
   const { studentId, isStudentIdValid, studentIdOnChangeHandler } = useContext(StudentIdContext)
   const { lendingList } = useContext(LendingListContext)
   const { isPostingNow, setIsPostingNow} = useContext(IsPostingNowContext)
+  const [ isBookGoingToBeReturned, setIsBookGoingToBeReturned ] = useState<{[key:string]:boolean}>({})
 
-  const returnBook = async (returnInfo: typeLendingList) => {
-    console.log(returnInfo)
-    setIsPostingNow(true)
-    const request = await axios.post<typeLendingList>(makeIsLendingNowFalseURL, {returnInfo})
-      .then((response: AxiosResponse) => {
-      console.log(response)
-      setIsPostingNow(false);
-    }).catch((error: AxiosError) => {
-      console.log(error)
-      setIsPostingNow(false);
+  useEffect(() => {
+    const lendingListByStudentId = lendingList.filter((lending) => lending.studentId === studentId)
+    var newRetrunableList: {[key:string]:boolean}= {}
+    lendingListByStudentId.forEach((lending) => {
+      newRetrunableList[lending.lendingDatetime] = false
     })
+    setIsBookGoingToBeReturned(newRetrunableList)
+  }, [studentId, lendingList])
+
+
+  const returnBook = async () => {
+    const returnInfo = Object.keys(isBookGoingToBeReturned).filter((key) => isBookGoingToBeReturned[key])
+    console.log(returnInfo)
+    // setIsPostingNow(true)
+    // const request = await axios.post<typeLendingList>(makeIsLendingNowFalseURL, {returnInfo})
+    //   .then((response: AxiosResponse) => {
+    //   console.log(response)
+    //   setIsPostingNow(false);
+    // }).catch((error: AxiosError) => {
+    //   console.log(error)
+    //   setIsPostingNow(false);
+    // })
   }
+  const checkboxHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const lendingDatetime = e.target.name
+    console.log({...isBookGoingToBeReturned, [lendingDatetime]: e.target.checked})
+    setIsBookGoingToBeReturned({...isBookGoingToBeReturned, [lendingDatetime]: e.target.checked})
+  }
+
 
   return (
       <>
@@ -39,6 +57,13 @@ export default function RetrunForm () {
           onChange={studentIdOnChangeHandler}
           error={studentId.length !== 0 && !isStudentIdValid}
         ></TextField>
+        <Button
+          variant="contained"
+          onClick={returnBook}
+          disabled={isPostingNow}
+        >
+          返却
+        </Button>
         {
           isPostingNow ? (
             <LinearProgress />
@@ -68,9 +93,7 @@ export default function RetrunForm () {
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                   <TableCell>
-                    <IconButton onClick={ ()=>returnBook(row) }>
-                      <DeleteIcon sx={{ color: red.A700 }}/>
-                    </IconButton>
+                    <Checkbox name={row.lendingDatetime} checked={isBookGoingToBeReturned[row.lendingDatetime] !== undefined ? false : isBookGoingToBeReturned[row.lendingDatetime]} onChange={ checkboxHandler } />
                   </TableCell>
                     <TableCell >{row.lendingDatetime}</TableCell>
                     {/* <TableCell >{row.studentId}</TableCell> */}
