@@ -1,9 +1,7 @@
 import { useContext, useState, useEffect } from 'react';
-import { TextField } from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox, Button } from '@mui/material';
 import { LinearProgress } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { red } from '@mui/material/colors';
 import _typeLendingList from '../../lib/typeLendingList.json';
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { StudentIdContext, LendingListContext, IsPostingNowContext } from '../App';
@@ -30,7 +28,7 @@ export default function RetrunForm () {
 
 
   const returnBook = async () => {
-    const returnInfo = Object.keys(isBookGoingToBeReturned).filter((key) => isBookGoingToBeReturned[key])
+    const returnInfo = Object.keys(isBookGoingToBeReturned).filter((key) => isBookGoingToBeReturned[key]) // 返却する本の情報（今はlendingDatetimeで指定している。配列で複数のlendingDatetimeを持ってる。うまく加工して）
     console.log(returnInfo)
     // setIsPostingNow(true)
     // const request = await axios.post<typeLendingList>(makeIsLendingNowFalseURL, {returnInfo})
@@ -51,19 +49,27 @@ export default function RetrunForm () {
 
   return (
       <>
+        <Typography variant='h6'>
+          返却方法
+        </Typography>
+        <Typography>
+          １．学籍番号を入力
+        </Typography>
+        <Typography>
+          ２．返却する本を選択
+        </Typography>
+        <Typography>
+          ３．返却ボタンを押す
+        </Typography>
+        <Box sx={{ height: 20 }} />
+
         <TextField
           value={studentId}
           label="学籍番号"
           onChange={studentIdOnChangeHandler}
           error={studentId.length !== 0 && !isStudentIdValid}
         ></TextField>
-        <Button
-          variant="contained"
-          onClick={returnBook}
-          disabled={isPostingNow}
-        >
-          返却
-        </Button>
+
         {
           isPostingNow ? (
             <LinearProgress />
@@ -93,7 +99,7 @@ export default function RetrunForm () {
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                   <TableCell>
-                    <Checkbox name={row.lendingDatetime} checked={isBookGoingToBeReturned[row.lendingDatetime] !== undefined ? false : isBookGoingToBeReturned[row.lendingDatetime]} onChange={ checkboxHandler } />
+                    <Checkbox name={row.lendingDatetime} checked={isBookGoingToBeReturned[row.lendingDatetime] === undefined ? false : isBookGoingToBeReturned[row.lendingDatetime]} onChange={ checkboxHandler } />
                   </TableCell>
                     <TableCell >{row.lendingDatetime}</TableCell>
                     {/* <TableCell >{row.studentId}</TableCell> */}
@@ -114,6 +120,14 @@ export default function RetrunForm () {
             </TableBody>
           </Table>
         </TableContainer>
+        <Box sx={{ height: 30 }} />
+        <Button
+          variant="contained"
+          onClick={returnBook}
+          disabled={isPostingNow || !isStudentIdValid || Object.keys(isBookGoingToBeReturned).filter((key) => isBookGoingToBeReturned[key]).length === 0}
+        >
+          返却
+        </Button>
         </>
   )
 }
