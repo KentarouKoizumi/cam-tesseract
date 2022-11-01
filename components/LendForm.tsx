@@ -8,17 +8,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Webcam from 'react-webcam';
 import axios, { AxiosResponse, AxiosError } from "axios";
 
-import { StudentIdContext, IsPostingNowContext } from '../App';
+import { StudentIdContext, IsPostingNowContext } from '../pages/index';
 
-import r from "../../lib/googleApi.json";
-import firebaseURL from "../firebaseURL.json"
+import googleAPIExample from "../lib/googleApi.json";
 
-import _typePostLendingList from "../../lib/typePostLendingList.json";
-
-type RES = typeof r
-type typePostLendingList = typeof _typePostLendingList
-
-const postDatabaseURL = firebaseURL.root + "/postDatabase";
+type RES = typeof googleAPIExample;
 
 
 export default function LendForm() {
@@ -40,14 +34,15 @@ export default function LendForm() {
   const [title, setTitle] = useState<string>('')
   // Google Books API で取得した書籍の著者
   const [authors, setAuthors] = useState<string[]>([''])
-  // sendRequestToPostDatabase関数のエラーを収納するuseState
-  const [errorSendRequestToPostDatabase, setErrorSendRequestToPostDatabase] = useState<string>("")
+  // PostLendingList関数のエラーを収納するuseState
+  const [errorPostLendingList, setErrorPostLendingList] = useState<string>("")
+  // snakbarを管理するuseState
+  const [snackbar, setSnackbar] = useState<{open: boolean, message: string}>({open: false, message: ""})
 
+  // 他のソースコードから参照するためのuseContext
   const { studentId, setStudentId, isStudentIdValid, studentIdOnChangeHandler } = useContext(StudentIdContext)
   const { isPostingNow, setIsPostingNow } = useContext(IsPostingNowContext)
 
-  // snakbarを管理するuseState
-  const [snackbar, setSnackbar] = useState<{open: boolean, message: string}>({open: false, message: ""})
 
   // カメラの設定。画質と，起動するカメラの向き（内カメラか外カメラか）を指定。
   const videoConstraints = {
@@ -55,6 +50,7 @@ export default function LendForm() {
     height: 1080,
     facingMode: "environment"
   };
+
   // 写真が撮られた時に呼び出される処理
   const capture = useCallback(
     () => {
@@ -67,6 +63,7 @@ export default function LendForm() {
     },
     [webcamRef]
   )
+
   // 画像を削除する関数。リトライボタンが押されたときに呼び出される。
   const delImage = () =>{
     setImage(null)
@@ -98,10 +95,13 @@ export default function LendForm() {
       setIsbn(resultString)
     }
   }
+
   // カメラの起動・停止を切り替える関数
   const toggleCam = () => {
     setIsCamOn(!isCamOn)
   }
+
+
   // isbn が更新されたときに呼び出される関数
   // Google Books API にリクエストを送り，書籍のタイトルと著者を取得する。
   useEffect(() =>{
@@ -139,26 +139,26 @@ export default function LendForm() {
   }
 
   // axiosでデータベースに貸出情報をjson形式で送る
-  const sendRequestToPostDatabase = async () => {
+  const postLendingList = async () => {
     setIsPostingNow(true)
-    const request = await axios.post<typePostLendingList>(postDatabaseURL, {
+    await axios.post("/api/postNewLending", {
       bookIsbn: isbn,
       bookAuthors: authors,
       bookTitle: title,
       studentId: studentId,
-      isLendingNow: true,
     }).then((response: AxiosResponse) => {
       setIsbn('')
-      setStudentId('')
       setIsPostingNow(false)
       setIsBookExist(false)
-      setErrorSendRequestToPostDatabase("")
+      setErrorPostLendingList("")
       setSnackbar({open: true, message: `貸出しました：${title}`})
     }).catch((error: AxiosError) => {
-      setErrorSendRequestToPostDatabase(error.request.response)
+      setErrorPostLendingList(error.request.response)
       setIsPostingNow(false)
     })
   }
+
+
   return (
     <>
       {
@@ -298,7 +298,7 @@ export default function LendForm() {
         }
         <Button
           variant="contained"
-          onClick={sendRequestToPostDatabase}
+          onClick={postLendingList}
           disabled={isPostingNow || !isBookExist || !isStudentIdValid}
         >
           借りる
@@ -324,8 +324,8 @@ export default function LendForm() {
       }
 
       {
-        (errorSendRequestToPostDatabase !== "") ?(
-          <Typography color="error">{errorSendRequestToPostDatabase}</Typography>
+        (errorPostLendingList !== "") ?(
+          <Typography color="error">{errorPostLendingList}</Typography>
         ):(
           <></>
         )
